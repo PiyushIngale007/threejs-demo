@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import * as THREE from "three";
-
+import starimg from "./assets/star.png";
 function App() {
   useEffect(() => {
     initStage();
@@ -15,6 +15,8 @@ function App() {
     setTimeout(function () {
       updateText();
     }, 40);
+
+    spaceBackground();
   }, []);
 
   let height,
@@ -23,6 +25,7 @@ function App() {
     scene,
     camera,
     renderer,
+    cube,
     particles = [],
     mouseVector = new THREE.Vector3(0, 0, 0),
     mousePos = new THREE.Vector3(0, 0, 0),
@@ -109,9 +112,6 @@ function App() {
     let geometryCore = new THREE.BoxGeometry(20, 20, 20);
     let materialCore = new THREE.MeshLambertMaterial({
       color: colors[i % colors.length],
-      wireframe: true,
-      wireframeLinewidth: 1,
-      // shading: THREE.FlatShading,
     });
     let box = new THREE.Mesh(geometryCore, materialCore);
     box.geometry.__dirtyVertices = true;
@@ -131,6 +131,7 @@ function App() {
     // }
 
     particle.add(box);
+
     this.particle = particle;
   };
 
@@ -223,6 +224,7 @@ function App() {
     updateParticles();
     camera.position.lerp(cameraTarget, 0.2);
     camera.lookAt(cameraLookAt);
+
     render();
   };
 
@@ -243,17 +245,50 @@ function App() {
   const mousemove = (e) => {
     let x = e.pageX - width / 2;
     let y = e.pageY - height / 2;
+    cube.position.x = x * -1;
+    cube.position.y = y;
     cameraTarget.x = x * -1;
     cameraTarget.y = y;
   };
 
+  const spaceBackground = () => {
+    const geometry = new THREE.BufferGeometry();
+    const noOfPoints = 1500; //1500;
+    geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(getRandomParticelPos(noOfPoints), 3)
+    );
+
+    const loader = new THREE.TextureLoader();
+    // create a basic material and set its color
+    // const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 });
+    const material = new THREE.PointsMaterial({
+      size: 0.1,
+      map: loader.load(starimg),
+      transparent: true,
+      // color: 0x44aa88,
+    });
+
+    // create a Mesh
+    cube = new THREE.Points(geometry, material);
+    cube.position.z = 800;
+
+    scene.add(cube);
+    console.log(scene);
+  };
+  const getRandomParticelPos = (particleCount) => {
+    const arr = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      arr[i] = (Math.random() - 0.5) * 10;
+    }
+    return arr;
+  };
   return (
     <>
       <div id="stage"></div>
 
-      <canvas id="text" width="700" height="200"></canvas>
-
       <input id="input" type="text" onChange={(ev) => updateText()} />
+      <canvas id="text" width="700" height="200"></canvas>
     </>
   );
 }
