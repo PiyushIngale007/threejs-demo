@@ -26,6 +26,8 @@ function App() {
     camera,
     renderer,
     cube,
+    cubeRed,
+    cubeGreen,
     particles = [],
     mouseVector = new THREE.Vector3(0, 0, 0),
     mousePos = new THREE.Vector3(0, 0, 0),
@@ -109,7 +111,7 @@ function App() {
 
   Particle.prototype.init = function (i) {
     let particle = new THREE.Object3D();
-    let geometryCore = new THREE.BoxGeometry(20, 20, 20);
+    let geometryCore = new THREE.TetrahedronGeometry(15);
     let materialCore = new THREE.MeshLambertMaterial({
       color: colors[i % colors.length],
     });
@@ -194,7 +196,7 @@ function App() {
   const updateText = () => {
     input = document.getElementById("input");
 
-    let fontSize = width / (input.value.length * 1.3);
+    let fontSize = width / (input.value.length * 2);
     if (fontSize > 120) fontSize = 120;
     textCtx.font = "700 " + fontSize + "px Arial";
     textCtx.clearRect(0, 0, width, 200);
@@ -247,6 +249,10 @@ function App() {
     let y = e.pageY - height / 2;
     cube.position.x = x * -1;
     cube.position.y = y;
+    cubeRed.position.x = x * -1;
+    cubeRed.position.y = y;
+    cubeGreen.position.x = x * -1;
+    cubeGreen.position.y = y;
     cameraTarget.x = x * -1;
     cameraTarget.y = y;
   };
@@ -268,12 +274,47 @@ function App() {
       transparent: true,
       // color: 0x44aa88,
     });
+    const materialRed = new THREE.PointsMaterial({
+      size: 0.1,
+      map: loader.load(starimg),
+      transparent: true,
+      color: 0x9c4747,
+    });
+
+    const materialGreen = new THREE.PointsMaterial({
+      size: 0.1,
+      map: loader.load(starimg),
+      transparent: true,
+      color: 0x44aa88,
+    });
 
     // create a Mesh
     cube = new THREE.Points(geometry, material);
     cube.position.z = 800;
 
+    const geometryRed = new THREE.BufferGeometry();
+    const noOfPointsRed = 1500; //1500;
+    geometryRed.setAttribute(
+      "position",
+      new THREE.BufferAttribute(getRandomParticelPos(noOfPointsRed), 3)
+    );
+
+    cubeRed = new THREE.Points(geometryRed, materialRed);
+
+    cubeRed.position.z = 800;
+
+    const geometryGreen = new THREE.BufferGeometry();
+    const noOfPointsGreen = 1500; //1500;
+    geometryGreen.setAttribute(
+      "position",
+      new THREE.BufferAttribute(getRandomParticelPos(noOfPointsGreen), 3)
+    );
+    cubeGreen = new THREE.Points(geometryGreen, materialGreen);
+
+    cubeGreen.position.z = 800;
     scene.add(cube);
+    scene.add(cubeRed);
+    scene.add(cubeGreen);
     console.log(scene);
   };
   const getRandomParticelPos = (particleCount) => {
